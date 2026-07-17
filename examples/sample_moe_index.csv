@@ -1,0 +1,13 @@
+file,compound,n_res,n_atoms,mw,smiles
+"Expedition_dockingrequest_29April_2026.moe","FL_21323",1,51,410.5,"S(=O)(=NC(=O)C=CC)(C)c1c(CC(=O)NCc2c[nH]c3cc(F)ccc23)cccc1"
+"Expedition_dockingrequest_29April_2026.moe","FL_21368(S)",1,54,438.5,"S(=O)(=NC(=O)C=CC)(C)c1c(CC(=O)NCc2c[nH]c3cc(Cl)ccc23)cccc1"
+"Expedition_dockingrequest_29April_2026.moe","FL_10357",1,40,320.4,"O=C(Nc1ccc(F)cc1)c1ccccc1C#N"
+"Expedition_dockingrequest_29April_2026.moe","sulfate",1,5,96.06,"OS(=O)(=O)O"
+"Expedition_dockingrequest_29April_2026.moe","XXXX",180,1400,20000.0,""
+"Expedition_dockingrequest_29April_2026.moe","CTNNB1",760,5900,85000.0,""
+"Expedition_dockingrequest_29April_2026.moe","TCF_peptide",18,140,2100.0,""
+"Expedition_dockingrequest_29April_2026.moe","waters_good",120,360,2160.0,"O"
+"batch2_15May_2026.moe","FL_21524",1,48,398.4,"COc1ccc2[nH]cc(CNC(=O)Cc3ccccc3S(C)(=O)=NC(=O)C=CC)c2c1"
+"batch2_15May_2026.moe","FL_pyrazole",1,44,372.4,"Cc1cc(C)n(-c2ccc(CC(=O)NCc3c[nH]c4ccccc34)cc2)n1"
+"batch2_15May_2026.moe","FL_21506",1,52,420.5,"S(=O)(=NC(=O)C=CC)(C)c1c(CC(=O)NCc2c[nH]c3cc(Br)ccc23)cccc1"
+"batch2_15May_2026.moe","big_macrocycle",1,95,1250.0,"O=C1NCCCCCCCCCCCCCCCCCCCCCCCCNC(=O)CCCCCCCCCCCCCCCCCCCCCCCC1"

@@ -1,0 +1,5 @@
+# MOE-CLAW Python dependencies (alternative to environment.yml).
+# Use conda/environment.yml if you can -- RDKit installs more reliably via conda.
+# But rdkit is now pip-installable too:
+rdkit>=2024.3.1
+pandas>=2.0

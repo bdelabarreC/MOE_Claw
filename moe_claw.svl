@@ -1,0 +1,123 @@
+// MOE-CLAW indexer
+//
+// Two modes:
+//   -dir  DIR    index every .moe in DIR          (full index)
+//   -file F ...  index only the named files       (incremental; repeatable)
+//
+// Writes CSV: file, file_date, compound, n_res, n_atoms, mw, smiles
+// Stereochemistry is perceived from each 3D pose and forced into the SMILES.
+//
+// Argument handling note: ArgvPull ['-flag', 1] returns ALL matching values
+// wrapped in an outer vector, e.g. [[a,b,c]] -- so 'cat' flattens it and
+// 'length' on the result is a reliable scalar. Do NOT test the raw result with
+// isnull or === '' ; neither works on the wrapped value.
+
+function pad2 n
+    if n < 10 then
+        return swrite ['0{}', n];
+    endif
+    return swrite ['{}', n];
+endfunction
+
+// Convert a clock value (as returned by fdate) to 'YYYY-MM-DD HH:MM:SS'.
+// NOTE: use clock_to_timeYMD, NOT asctime -- asctime ignores its argument and
+// returns the current time, which would stamp every row with the run time.
+function iso_date clockval
+    local v = clock_to_timeYMD clockval;   // [year, month, day, hour, min, sec]
+    return swrite ['{}-{}-{} {}:{}:{}',
+        v(1), pad2 v(2), pad2 v(3), pad2 v(4), pad2 v(5), pad2 v(6)];
+endfunction
+
+// Index an explicit list of .moe files into csvpath.
+function IndexFileList [files, csvpath]
+    write ['Indexing {} file(s) -> {}\n', length files, csvpath];
+
+    local f = fopenw csvpath;
+    fwrite [f, 'file,file_date,compound,n_res,n_atoms,mw,smiles\n'];
+
+    local nrows = 0;
+    local nfile = 0;
+    local fname;
+    for fname in files loop
+        nfile = nfile + 1;
+        // progress BEFORE the slow read, so you can see which file it's on
+        write ['[{}/{}] reading {} ...\n', nfile, length files, ftail fname];
+
+        local fdts = iso_date fdate fname;   // file mtime, once per file
+
+        oDestroy Chains [];
+        ReadAuto fname;
+
+        local chains = Chains [];
+        local names  = cName chains;
+        local nres   = cResidueCount chains;
+        write ['       {} chain(s), writing rows\n', length chains];
+
+        local i;
+        for i = 1, length chains loop
+            local ch     = chains(i);
+            local atoms  = cat cAtoms ch;
+            local natoms = length atoms;
+            local mw     = add aMass atoms;
+
+            // Perceive R/S from the 3D coordinates and force it, so the
+            // extracted SMILES is isomeric rather than flat.
+            aSetForceRS [atoms, aRSChirality atoms];
+
+            local smi    = sm_ExtractUnique atoms;
+            local smistr = swrite ['{}', smi];
+
+            fwrite [f, '"{}","{}","{}",{},{},{},"{}"\n',
+                ftail fname, fdts, names(i), nres(i), natoms, mw, smistr];
+            nrows = nrows + 1;
+        endloop
+
+        fflush f;    // flush per file so a crash still leaves a partial CSV
+    endloop
+
+    oDestroy Chains [];
+    fclose f;
+    write ['Done. {} rows from {} file(s) written to {}\n',
+           nrows, length files, csvpath];
+endfunction
+
+global function main []
+    // cat: ArgvPull returns values wrapped in an outer vector
+    local dirv = cat ArgvPull ['-dir',  1];
+    local csvv = cat ArgvPull ['-csv',  1];
+    local fls  = cat ArgvPull ['-file', 1];
+
+    local dir = '.';
+    if length dirv > 0 then
+        dir = dirv(1);
+    endif
+
+    local csv;
+    if length csvv > 0 then
+        csv = csvv(1);
+    else
+        csv = swrite ['{}/moe_index.csv', dir];
+    endif
+
+    // -file wins over -dir: incremental mode indexes only the named files
+    local files;
+    if length fls > 0 then
+        write ['Incremental mode: {} file(s) named on the command line.\n',
+               length fls];
+        files = fls;
+    else
+        write ['Full mode: scanning {}\n', dir];
+        files = flist [dir, '*.moe'];
+    endif
+
+    if length files == 0 then
+        write ['No .moe files to index.\n'];
+        Close [];
+        exit [];
+    endif
+
+    IndexFileList [files, csv];
+    write '\nBatch indexing complete.\n';
+    Close [];
+    exit [];
+endfunction

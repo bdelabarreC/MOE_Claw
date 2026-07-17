@@ -1,0 +1,8 @@
+name: moeclaw
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.10
+  - rdkit>=2024.03
+  - pandas>=2.0
+  - pip

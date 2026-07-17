@@ -1,0 +1,29 @@
+# RDKit-JS runtime -- fetched by fetch_rdkit_js.py, not stored in git (large binary)
+RDKit_minimal.js
+RDKit_minimal.wasm
+
+# Generated browser output
+moe_browser.html
+*.html
+
+# Generated index / data (user-specific, may be proprietary)
+moe_index.csv
+*_index.csv
+moeclaw_selection.csv
+moeclaw_selection.sdf
+!examples/sample_moe_index.csv
+
+# MOE batch logs
+logs/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+env/
+
+# OS cruft
+.DS_Store
+Thumbs.db
