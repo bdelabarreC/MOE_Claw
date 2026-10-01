@@ -1,5 +1,8 @@
 # MOE-CLAW
 
+
+![alt text](MOECLAW_screenshot-1.png)
+
 A tool for indexing compounds out of MOE `.moe` files and browsing them as an
 interactive, searchable, offline chemical-structure gallery.
 
