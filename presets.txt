@@ -1,0 +1,13 @@
+# MOE-CLAW quick-query presets
+# Format:  label = SMARTS        (split on the FIRST '=' only)
+# Lines starting with '#' are comments. Blank lines ignored.
+
+alkyne warhead = C#C
+reacted warhead = C=CC(=O)N
+sulfinamide = S(=O)(=N)
+indole = c1ccc2[nH]ccc2c1
+pyrazole = c1cc[nH]n1
+amide = C(=O)N
+nitrile = C#N
+halogen = [F,Cl,Br,I]
+acid = C(=O)[OH]

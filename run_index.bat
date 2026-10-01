@@ -9,15 +9,15 @@ REM  Shows progress on screen AND writes a log.
 REM ============================================================================
 
 REM --- Adjust this to your MOE install path ---
-set MOE_BIN=D:\Program Files\moe2024\bin
+set MOE_BIN=D:\Program Files\moe2024.0601\bin
 REM --- Adjust to location of moe_claw script
-set SCRIPT=G:\My Drive\Clients\Expedition\targets\CTNNB1\moe_files\test\moe_claw.svl
+set SCRIPT=%~dp0moe_claw.svl
 REM --- Adjust to where you want log output deposited (helps with trouble shooting)
-set LOGDIR=G:\My Drive\Clients\Expedition\targets\CTNNB1\moe_files\logs
+set LOGDIR=%~dp0logs
 
 REM --- Directory to index: use first argument, or a default as shown below ---
 if "%~1"=="" (
-    set TARGET_DIR=G:/My Drive/Clients/Expedition/targets/CTNNB1/moe_files
+    set TARGET_DIR=%~dp0moe_files
 ) else (
     set TARGET_DIR=%~1
 )

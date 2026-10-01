@@ -19,7 +19,7 @@ REM ============================================================================
 REM ---- CONFIG ----------------------------------------------------------------
 set "APPDIR=%~dp0"
 set "SCRIPT=MOEClaw_buildbrowser.py"
-set "CONDA_ENV=moeclaw"
+set "CONDA_ENV=rdkit"
 set "PORT=8000"
 REM ----------------------------------------------------------------------------
 
@@ -77,15 +77,15 @@ if errorlevel 1 (
 )
 
 REM ---- Fetch RDKit-JS runtime if missing -------------------------------------
-if not exist "%APPDIR%RDKit_minimal.wasm" (
-    echo.
-    echo First run: fetching RDKit-JS runtime ^(~7 MB^)...
-    python "%APPDIR%fetch_rdkit_js.py" --dir "%APPDIR%"
-    if errorlevel 1 (
-        echo ERROR: could not fetch RDKit-JS. Check your internet connection.
-        goto :end
-    )
-)
+@REM  if not exist "%APPDIR%RDKit_minimal.wasm" (
+@REM      echo.
+@REM      echo First run: fetching RDKit-JS runtime ^(~7 MB^)...
+@REM      python "%APPDIR%fetch_rdkit_js.py" --dir "%APPDIR%"
+@REM      if errorlevel 1 (
+@REM          echo ERROR: could not fetch RDKit-JS. Check your internet connection.
+@REM          goto :end
+@REM      )
+@REM  )
 
 REM ---- Build -----------------------------------------------------------------
 echo.

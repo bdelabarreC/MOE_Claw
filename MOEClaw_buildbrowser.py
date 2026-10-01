@@ -29,6 +29,7 @@ import base64
 import html
 import json
 import sys
+import os
 
 import pandas as pd
 from rdkit import Chem
@@ -39,6 +40,49 @@ from rdkit.Chem import rdFingerprintGenerator
 from rdkit.Chem.Draw import rdMolDraw2D
 from rdkit.ML.Cluster import Butina
 
+DEFAULT_PRESETS = [
+    ("amide", "C(=O)N"),
+    ("nitrile", "C#N"),
+    ("halogen", "[F,Cl,Br,I]"),
+    ("acid", "C(=O)[OH]"),
+    ("aromatic ring", "c1ccccc1"),
+]
+
+
+def load_presets(path):
+    """Read 'label = SMARTS' lines. Splits on the FIRST '=' only, so SMARTS
+    containing '=' survive; '#' only starts a comment at the start of a line,
+    so 'C#C' is safe. Returns DEFAULT_PRESETS if the file is absent."""
+    if not path or not os.path.exists(path):
+        return list(DEFAULT_PRESETS)
+    presets = []
+    with open(path, encoding="utf-8") as f:
+        for n, raw in enumerate(f, 1):
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            if "=" not in line:
+                print(f"  presets: line {n} has no '=', skipped: {line}")
+                continue
+            label, smarts = (p.strip() for p in line.split("=", 1))
+            if not label or not smarts:
+                continue
+            if Chem.MolFromSmarts(smarts) is None:
+                print(f"  presets: line {n} invalid SMARTS, skipped: {smarts}")
+                continue
+            presets.append((label, smarts))
+    return presets
+
+
+def presets_html(presets):
+    rows = [
+        '    <span class="presetlabel">quick queries:</span>',
+    ]
+    for label, smarts in presets:
+        rows.append('    <button data-q="%s">%s</button>'
+                    % (html.escape(smarts, quote=True), html.escape(label)))
+    rows.append('    <button data-q="" class="clearq">clear</button>')
+    return "\n".join(rows)
 
 def cluster_families(mols_by_idx, cutoff=0.35):
     """Butina-cluster a dict {record_index: mol}. Returns:
@@ -239,10 +283,13 @@ def is_additive(mol, canon_smiles, name, additive_set):
 
 
 def build(input_csv, output_html, mw_min, mw_max, nres, smarts=None,
-          filter_additives=True):
+          filter_additives=True, presets_file=None):
     # Silence RDKit's own parse/valence chatter -- expected first-attempt
     # failures are handled by repair_moe_smiles and reported in our own summary.
     RDLogger.DisableLog("rdApp.*")
+
+    presets = load_presets(presets_file)
+    print(f"  presets: {len(presets)} quick-query button(s)")
 
     df = pd.read_csv(input_csv)
 
@@ -395,6 +442,7 @@ def build(input_csv, output_html, mw_min, mw_max, nres, smarts=None,
 
     data_json = json.dumps(records)
     page = HTML_TEMPLATE.replace("/*DATA*/", data_json) \
+                        .replace("/*PRESETS*/", presets_html(presets)) \
                         .replace("/*HASDATES*/", "true" if has_dates else "false") \
                         .replace("{{COUNT}}", str(len(records))) \
                         .replace("{{MWMIN}}", str(mw_min)) \
@@ -547,17 +595,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     <span id="status"></span>
   </div>
   <div class="presets" id="presets">
-    <span class="presetlabel">quick queries:</span>
-    <button data-q="C#C">alkyne warhead</button>
-    <button data-q="C=CC(=O)N">reacted warhead</button>
-    <button data-q="S(=O)(=N)">sulfinamide</button>
-    <button data-q="c1ccc2[nH]ccc2c1">indole</button>
-    <button data-q="c1cc[nH]n1">pyrazole</button>
-    <button data-q="C(=O)N">amide</button>
-    <button data-q="C#N">nitrile</button>
-    <button data-q="[F,Cl,Br,I]">halogen</button>
-    <button data-q="C(=O)[OH]">acid</button>
-    <button data-q="" class="clearq">clear</button>
+/*PRESETS*/
   </div>
 </header>
 <div class="banner" id="banner">
@@ -923,6 +961,12 @@ if __name__ == "__main__":
     ap.add_argument("--keep-additives", action="store_true",
                     help="Do NOT filter out common buffer/crystallography additives "
                          "(HEPES, glycerol, sulfate, etc.). By default they are removed.")
+    ap.add_argument("--presets",
+                    default=os.path.join(
+                        os.path.dirname(os.path.abspath(__file__)), "presets.txt"),
+                    help="File of 'label = SMARTS' quick-query presets "
+                         "(default: presets.txt beside this script; "
+                         "built-in generics if absent)")
     args = ap.parse_args()
     build(args.input_csv, args.output, args.mw_min, args.mw_max, args.nres,
-          args.smarts, filter_additives=not args.keep_additives)
+          args.smarts, filter_additives=not args.keep_additives, presets_file=args.presets)

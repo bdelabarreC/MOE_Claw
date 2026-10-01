@@ -62,8 +62,8 @@ pip install -r requirements.txt
 ### 3. Fetch the RDKit-JS runtime
 
 The in-page substructure search needs two RDKit-JS files
-(`RDKit_minimal.js` + `RDKit_minimal.wasm`, ~7 MB). They are **not** stored in
-git (the `.wasm` is a large binary). Download them with:
+(`RDKit_minimal.js` + `RDKit_minimal.wasm`, ~7 MB). They are included in
+git but may need updating depending on your local environment. You can download them with:
 
 ```
 python fetch_rdkit_js.py
@@ -95,7 +95,7 @@ into the SMILES, so chirality survives into the browser.
 > cloud. Reading many large files can take several minutes — the indexer prints
 > `[n/total] reading ...` progress so you can see it's working.
 
-### Step 1b — Incremental updates (optional)
+### Step 1b — Incremental updates (optional & under development - mileage may vary!)
 
 Reindexing a whole folder is slow. `moeclaw_update.py` reads only `.moe` files
 that are new or have changed since the last index, then merges the results into
@@ -127,6 +127,11 @@ run_moeclaw.bat path\to\moe_index.csv
 ```
 ./run_moeclaw.sh path/to/moe_index.csv
 ```
+### Step 2B - Already have an index file?
+
+'''
+Run MOEClaw - browseropener.bat (this will look for an existing html file and use it)
+'''
 
 The launcher activates the conda env, fetches RDKit-JS if needed, builds
 `moe_browser.html`, starts a local server on port 8000, and opens the page.
